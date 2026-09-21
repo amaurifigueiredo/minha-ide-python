@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pyide-v2';
+const CACHE_NAME = 'pyide-v3';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (event) => {
