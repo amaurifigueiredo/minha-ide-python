@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Python Mobile IDE Pro + AI by Amauri DFC</title>
+    <title>Python IDE by Amauri DFC</title>
     
     <!-- Configurações PWA -->
     <link rel="manifest" href="manifest.json">
@@ -34,10 +34,8 @@
             --bg-panel: #161824;
             --bg-header: #12141d;
             --accent-green: #10b981;
-            --accent-green-hover: #059669;
             --accent-purple: #8b5cf6;
             --accent-purple-light: #a78bfa;
-            --accent-blue: #3b82f6;
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
             --border-color: rgba(255, 255, 255, 0.08);
@@ -56,19 +54,19 @@
         }
 
         header {
-            background-color: rgba(18, 20, 29, 0.85);
+            background-color: rgba(18, 20, 29, 0.95);
             backdrop-filter: blur(12px);
-            padding: 8px 12px;
+            padding: 10px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
-            z-index: 10;
+            z-index: 100;
         }
 
         .logo {
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -79,21 +77,21 @@
 
         .header-actions {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             align-items: center;
             flex-shrink: 0;
         }
 
         .btn {
             border: none;
-            padding: 6px 10px;
+            padding: 6px 12px;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             white-space: nowrap;
             transition: all 0.2s ease;
         }
@@ -159,7 +157,7 @@
 
         .panel-header {
             background-color: rgba(255, 255, 255, 0.02);
-            padding: 6px 14px;
+            padding: 8px 14px;
             font-size: 0.72rem;
             font-weight: 700;
             color: var(--text-muted);
@@ -169,7 +167,6 @@
             gap: 8px;
         }
 
-        /* Ajuste do CodeMirror */
         .CodeMirror {
             flex: 1;
             height: 100% !important;
@@ -210,13 +207,12 @@
             white-space: pre-wrap;
         }
 
-        /* Modal da IA */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.75);
-            z-index: 100;
+            z-index: 1000;
             align-items: center;
             justify-content: center;
             padding: 16px;
@@ -262,13 +258,13 @@
         </div>
         <div class="header-actions">
             <button class="btn btn-save" onclick="saveCodeToFile()" title="Salvar arquivo Python">
-                <i class="fa-solid fa-download"></i> Salvar
+                <i class="fa-solid fa-download"></i> <span>Salvar</span>
             </button>
             <button class="btn btn-ai" onclick="openAIModal()">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> IA
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span>IA</span>
             </button>
             <button class="btn btn-run" onclick="runPython()">
-                <i class="fa-solid fa-play"></i>
+                <i class="fa-solid fa-play"></i> <span>Executar</span>
             </button>
         </div>
     </header>
@@ -316,7 +312,6 @@ for i in range(1, 6):
         </div>
     </div>
 
-    <!-- Modal Auxiliar da IA -->
     <div class="modal" id="ai-modal">
         <div class="modal-content">
             <h3><i class="fa-solid fa-robot"></i> Assistente IA Python</h3>
@@ -387,7 +382,6 @@ for i in range(1, 6):
             }
         }
 
-        // Função para Salvar o Arquivo no Aparelho
         function saveCodeToFile() {
             const code = editor.getValue();
             const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
