@@ -3,110 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Python Mobile IDE</title>
+    <title>Python Mobile IDE Pro</title>
     
     <!-- Configurações PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#181825">
     
-    <!-- Interpreter Python (Pyodide) -->
+    <!-- Pyodide -->
     <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
+        :root {
+            --bg-dark: #0f111a;
+            --bg-panel: #161824;
+            --bg-header: #12141d;
+            --accent-green: #10b981;
+            --accent-green-hover: #059669;
+            --accent-purple: #8b5cf6;
+            --accent-purple-light: #a78bfa;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --code-bg: #11131e;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #1e1e2e;
-            color: #cdd6f4;
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* Cabeçalho */
+        /* Header com Blur e Glassmorphism */
         header {
-            background-color: #181825;
-            padding: 10px 15px;
+            background-color: rgba(18, 20, 29, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 12px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #313244;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 10;
         }
 
-        .logo { font-weight: bold; font-size: 1.1rem; color: #cba6f7; }
+        .logo {
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-        .header-actions { display: flex; gap: 8px; align-items: center; }
+        .logo i { color: var(--accent-purple-light); font-size: 1.3rem; }
+
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+
+        .btn {
+            border: none; padding: 8px 16px; border-radius: 10px;
+            font-weight: 600; font-size: 0.85rem; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s ease;
+        }
 
         .btn-run {
-            background-color: #a6e3a1;
-            color: #11111b;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            cursor: pointer;
+            background-color: var(--accent-green); color: #fff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
+
+        .btn-run:hover { background-color: var(--accent-green-hover); transform: translateY(-1px); }
 
         .btn-install {
-            background-color: #313244;
-            color: #cba6f7;
-            border: 1px solid #cba6f7;
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
+            background: rgba(139, 92, 246, 0.15); color: var(--accent-purple-light);
+            border: 1px solid rgba(139, 92, 246, 0.3);
         }
 
-        /* Abas no Celular */
-        .tabs { display: flex; background-color: #181825; border-bottom: 1px solid #313244; }
+        .btn-install:hover { background: rgba(139, 92, 246, 0.25); }
+
+        /* Abas Estilizadas no Mobile */
+        .tabs {
+            display: flex; background-color: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            padding: 4px 8px; gap: 6px;
+        }
 
         .tab-btn {
             flex: 1; padding: 10px; background: none; border: none;
-            color: #a6adc8; font-size: 0.9rem; font-weight: 600; cursor: pointer;
-            border-bottom: 2px solid transparent; text-align: center;
+            color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.2s;
         }
 
-        .tab-btn.active { color: #cba6f7; border-bottom-color: #cba6f7; background-color: #1e1e2e; }
+        .tab-btn.active {
+            color: var(--text-main); background-color: var(--bg-panel);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
 
-        /* Container Principal */
+        /* Área Principal */
         .main-container { flex: 1; position: relative; overflow: hidden; }
 
-        .panel { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; flex-direction: column; }
-        .panel.active { display: flex; }
-
-        /* Editor */
-        textarea#code {
-            width: 100%; flex: 1; background-color: #1e1e2e; color: #a6e3a1;
-            font-family: "Courier New", Courier, monospace; font-size: 15px;
-            line-height: 1.5; padding: 12px; border: none; outline: none; resize: none;
+        .panel {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: none; flex-direction: column; background-color: var(--bg-panel);
         }
 
-        /* Atalhos do Teclado Mobile */
+        .panel.active { display: flex; }
+
+        .panel-header {
+            background-color: rgba(255, 255, 255, 0.02);
+            padding: 8px 16px; font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.5px; color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* Editor Pro */
+        textarea#code {
+            width: 100%; flex: 1; background-color: var(--code-bg);
+            color: #e2e8f0; font-family: 'Fira Code', monospace;
+            font-size: 14px; line-height: 1.6; padding: 16px;
+            border: none; outline: none; resize: none;
+            caret-color: var(--accent-purple-light);
+        }
+
+        /* Teclas Rápidas */
         .quick-keys {
-            display: flex; background-color: #181825; padding: 6px 10px; gap: 6px;
-            overflow-x: auto; border-top: 1px solid #313244; white-space: nowrap;
+            display: flex; background-color: var(--bg-header);
+            padding: 8px 12px; gap: 8px; overflow-x: auto;
+            border-top: 1px solid var(--border-color); white-space: nowrap;
         }
 
         .quick-key {
-            background-color: #313244; color: #cdd6f4; border: 1px solid #45475a;
-            border-radius: 6px; padding: 6px 12px; font-family: monospace; font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.05); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 8px 14px; font-family: 'Fira Code', monospace;
+            font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s;
         }
+
+        .quick-key:active { background-color: rgba(255, 255, 255, 0.15); }
 
         /* Console */
         #output {
-            flex: 1; background-color: #11111b; color: #89b4fa;
-            font-family: "Courier New", Courier, monospace; font-size: 14px;
-            padding: 12px; overflow-y: auto; white-space: pre-wrap;
+            flex: 1; background-color: #090a0f; color: #38bdf8;
+            font-family: 'Fira Code', monospace; font-size: 13.5px;
+            line-height: 1.6; padding: 16px; overflow-y: auto; white-space: pre-wrap;
         }
 
-        /* Responsividade Desktop */
+        /* Layout Desktop */
         @media (min-width: 768px) {
             .tabs, .quick-keys { display: none; }
-            .main-container { display: flex; flex-direction: row; gap: 1px; background-color: #313244; }
+            .main-container { display: flex; flex-direction: row; gap: 1px; background-color: var(--border-color); }
             .panel { position: relative; display: flex !important; flex: 1; }
         }
     </style>
@@ -114,27 +172,41 @@
 <body>
 
     <header>
-        <div class="logo">🐍 Python IDE</div>
+        <div class="logo">
+            <i class="fa-brands fa-python"></i>
+            <span>Python IDE</span>
+        </div>
         <div class="header-actions">
-            <button id="btn-install" class="btn-install" style="display: none;" onclick="installPWA()">📥 Baixar App</button>
-            <button class="btn-run" onclick="runPython()">▶ Executar</button>
+            <button id="btn-install" class="btn btn-install" style="display: none;" onclick="installPWA()">
+                <i class="fa-solid fa-download"></i> Baixar App
+            </button>
+            <button class="btn btn-run" onclick="runPython()">
+                <i class="fa-solid fa-play"></i> Executar
+            </button>
         </div>
     </header>
 
     <div class="tabs">
-        <button class="tab-btn active" id="tab-editor-btn" onclick="switchTab('editor')">📝 Código</button>
-        <button class="tab-btn" id="tab-output-btn" onclick="switchTab('output')">💻 Console</button>
+        <button class="tab-btn active" id="tab-editor-btn" onclick="switchTab('editor')">
+            <i class="fa-solid fa-code"></i> Código
+        </button>
+        <button class="tab-btn" id="tab-output-btn" onclick="switchTab('output')">
+            <i class="fa-solid fa-terminal"></i> Console
+        </button>
     </div>
 
     <div class="main-container">
         <div class="panel active" id="panel-editor">
+            <div class="panel-header">
+                <i class="fa-regular fa-file-code"></i> EDITOR DE CÓDIGO
+            </div>
             <textarea id="code" spellcheck="false" placeholder="Digite seu código Python aqui...">
 # Escreva seu código Python abaixo
-nome = "Mundo"
-print(f"Olá, {nome}!")
+nome = "Dev"
+print(f"Olá, {nome}! Bem-vindo ao seu ambiente de código.")
 
 for i in range(1, 6):
-    print("Contagem:", i)
+    print("Executando passo:", i)
             </textarea>
 
             <div class="quick-keys">
@@ -150,6 +222,9 @@ for i in range(1, 6):
         </div>
 
         <div class="panel" id="panel-output">
+            <div class="panel-header">
+                <i class="fa-solid fa-terminal"></i> SAÍDA DO CONSOLE
+            </div>
             <div id="output">Carregando o Python na memória... Aguarde um instante.</div>
         </div>
     </div>
@@ -157,7 +232,6 @@ for i in range(1, 6):
     <script>
         let pyodideReady = false, pyodide, deferredPrompt;
 
-        // 1. Inicializa o Python
         async function initPyodide() {
             pyodide = await loadPyodide();
             document.getElementById("output").innerText = "Pronto para executar! Clique ou toque em 'Executar'.";
@@ -165,7 +239,6 @@ for i in range(1, 6):
         }
         initPyodide();
 
-        // 2. Troca de abas no Mobile
         function switchTab(tab) {
             document.getElementById("panel-editor").classList.toggle("active", tab === 'editor');
             document.getElementById("panel-output").classList.toggle("active", tab === 'output');
@@ -173,7 +246,6 @@ for i in range(1, 6):
             document.getElementById("tab-output-btn").classList.toggle("active", tab === 'output');
         }
 
-        // 3. Atalhos especiais de teclado
         function insertSymbol(symbol) {
             const textarea = document.getElementById("code");
             const start = textarea.selectionStart, end = textarea.selectionEnd;
@@ -182,7 +254,6 @@ for i in range(1, 6):
             textarea.focus();
         }
 
-        // 4. Execução do código
         async function runPython() {
             if (!pyodideReady) return alert("O Python ainda está carregando. Aguarde alguns segundos.");
             if (window.innerWidth < 768) switchTab('output');
@@ -200,7 +271,6 @@ for i in range(1, 6):
             }
         }
 
-        // 5. Lógica PWA: Exibe o botão "Baixar App" SOMENTE se for Mobile
         function isMobileDevice() {
             return (window.innerWidth <= 768) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
         }
@@ -209,7 +279,7 @@ for i in range(1, 6):
             e.preventDefault();
             deferredPrompt = e;
             if (isMobileDevice()) {
-                document.getElementById('btn-install').style.display = 'inline-block';
+                document.getElementById('btn-install').style.display = 'flex';
             }
         });
 
@@ -223,7 +293,6 @@ for i in range(1, 6):
             deferredPrompt = null;
         }
 
-        // Registra o Service Worker para PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
