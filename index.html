@@ -37,6 +37,7 @@
             --accent-green-hover: #059669;
             --accent-purple: #8b5cf6;
             --accent-purple-light: #a78bfa;
+            --accent-blue: #3b82f6;
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
             --border-color: rgba(255, 255, 255, 0.08);
@@ -57,7 +58,7 @@
         header {
             background-color: rgba(18, 20, 29, 0.85);
             backdrop-filter: blur(12px);
-            padding: 10px 16px;
+            padding: 8px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -67,28 +68,43 @@
 
         .logo {
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            white-space: nowrap;
         }
 
-        .logo i { color: var(--accent-purple-light); font-size: 1.2rem; }
+        .logo i { color: var(--accent-purple-light); font-size: 1.1rem; }
 
-        .header-actions { display: flex; gap: 8px; align-items: center; }
+        .header-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-shrink: 0;
+        }
 
         .btn {
             border: none;
-            padding: 8px 14px;
+            padding: 6px 10px;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
+            white-space: nowrap;
             transition: all 0.2s ease;
         }
+
+        .btn-save {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-save:hover { background-color: rgba(255, 255, 255, 0.15); }
 
         .btn-run {
             background-color: var(--accent-green);
@@ -144,7 +160,7 @@
         .panel-header {
             background-color: rgba(255, 255, 255, 0.02);
             padding: 6px 14px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border-color);
@@ -199,7 +215,7 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             z-index: 100;
             align-items: center;
             justify-content: center;
@@ -220,7 +236,7 @@
 
         .modal-content textarea {
             width: 100%;
-            height: 80px;
+            height: 90px;
             background: var(--bg-dark);
             border: 1px solid var(--border-color);
             color: #fff;
@@ -245,11 +261,14 @@
             <span>Python IDE</span>
         </div>
         <div class="header-actions">
+            <button class="btn btn-save" onclick="saveCodeToFile()" title="Salvar arquivo Python">
+                <i class="fa-solid fa-download"></i> Salvar
+            </button>
             <button class="btn btn-ai" onclick="openAIModal()">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> IA
             </button>
             <button class="btn btn-run" onclick="runPython()">
-                <i class="fa-solid fa-play"></i> Executar
+                <i class="fa-solid fa-play"></i>
             </button>
         </div>
     </header>
@@ -313,7 +332,6 @@ for i in range(1, 6):
     <script>
         let editor, pyodideReady = false, pyodide;
 
-        // Inicializa o CodeMirror com Auto-completar
         window.onload = function() {
             editor = CodeMirror.fromTextArea(document.getElementById("code"), {
                 mode: "python",
@@ -325,7 +343,6 @@ for i in range(1, 6):
                 extraKeys: { "Ctrl-Space": "autocomplete" }
             });
 
-            // Dispara auto-completar ao digitar
             editor.on("keyup", function (cm, event) {
                 if (!cm.state.completionActive && event.keyCode >= 65 && event.keyCode <= 90) {
                     CodeMirror.commands.autocomplete(cm, null, { completeSingle: false });
@@ -370,7 +387,17 @@ for i in range(1, 6):
             }
         }
 
-        // Funções do Modal da IA
+        // Função para Salvar o Arquivo no Aparelho
+        function saveCodeToFile() {
+            const code = editor.getValue();
+            const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "meu_programa.py";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
         function openAIModal() { document.getElementById("ai-modal").style.display = "flex"; }
         function closeAIModal() { document.getElementById("ai-modal").style.display = "none"; }
 
@@ -382,7 +409,6 @@ for i in range(1, 6):
             btn.innerText = "A gerar...";
             
             try {
-                // Requisição para a API de IA gratuita
                 const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent("Gere apenas código Python limpo (sem explicações ou marcações de markdown) para: " + prompt)}`);
                 const code = await res.text();
                 
@@ -394,6 +420,12 @@ for i in range(1, 6):
             } finally {
                 btn.innerText = "Gerar Código";
             }
+        }
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+            });
         }
     </script>
 </body>
